@@ -7,7 +7,7 @@ RUN git clone https://github.com/cloviscoli/evolution-api.git /src \
 FROM node:24-alpine AS builder
 RUN apk update && apk add --no-cache git ffmpeg wget curl bash openssl dos2unix
 WORKDIR /evolution
-COPY --from=src /src/package.json /src/package-lock.json /src/tsconfig.json /src/tsup.config.ts ./
+COPY --from=src /src/package.json /src/package-lock.json /src/tsconfig.json /src/tsup.config.ts /src/prisma.config.ts ./
 COPY --from=src /src/patches ./patches
 RUN npm ci --silent
 RUN npx patch-package
@@ -39,5 +39,6 @@ COPY --from=builder /evolution/.env ./.env
 COPY --from=builder /evolution/Docker ./Docker
 COPY --from=builder /evolution/runWithProvider.js ./runWithProvider.js
 COPY --from=builder /evolution/tsup.config.ts ./tsup.config.ts
+COPY --from=builder /evolution/prisma.config.ts ./prisma.config.ts
 EXPOSE 8080
 ENTRYPOINT ["/bin/bash", "-c", ". ./Docker/scripts/deploy_database.sh && npm run start:prod" ]
